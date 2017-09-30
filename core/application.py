@@ -1,4 +1,5 @@
-from core import configuration, logger, network
+from core import configuration, network
+import logging
 
 
 class Application:
@@ -9,7 +10,8 @@ class Application:
     def __init__(self, argv):
         self.argv = argv
         self.configuration = None
-        self.logger = logger.Logger()
+        logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] %(message)s',
+                            datefmt='%d.%m.%Y %I:%M:%S')
 
     def print_head(self):
         print(' =================================')
@@ -19,16 +21,24 @@ class Application:
         print(' =================================')
         print()
 
+    def check_connection(self):
+        try:
+            network.make_request(self.SERVER_HOST)
+        except network.NoInternetConnection:
+            return False
+        return True
+
     def run(self):
         self.print_head()
 
         if len(self.argv) != 2:
-            print('USAGE: minerwatch.exe SECRET_KEY')
+            logging.error('USAGE: minerwatch.exe SECRET_KEY')
             return -1
 
         # check internet connection
-        if network.make_request(self.SERVER_HOST) is False:
-
+        if not self.check_connection():
+            logging.error('No connection to Miner Watch server')
+            return -1
 
         try:
             self.configuration = configuration.load()

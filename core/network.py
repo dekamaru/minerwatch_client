@@ -1,8 +1,18 @@
-def make_request(url):
-    try:
-        requests.get(self.PROTO_HOST)
-    except requests.exceptions.RequestException as e:
-        log('NETWORK', 'No access to protocol host. Network connection is bad?')
-        time.sleep(2000)
-        sys.exit(-1)
+import requests
 
+
+class NoInternetConnection(Exception):
+    pass
+
+
+def make_request(url, method='GET', payload=None):
+    if payload is None:
+        payload = {}
+    try:
+        if method == 'get':
+            req = requests.get(url, data=payload)
+        else:
+            req = requests.post(url, data=payload)
+    except requests.exceptions.RequestException as e:
+        raise NoInternetConnection
+    return req
