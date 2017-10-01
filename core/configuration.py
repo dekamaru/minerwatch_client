@@ -14,3 +14,8 @@ def load():
     with open("miner.settings") as f:
         configuration = json.loads(f.read())
     return configuration
+
+
+def save(configuration):
+    with open('miner.settings', 'w') as f:
+        f.write(json.dumps(configuration))
