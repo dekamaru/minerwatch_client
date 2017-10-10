@@ -1,5 +1,8 @@
 from core import configuration, network, protocol, system
+from threads import miner, observer
 import logging
+import threading
+import time
 
 
 class Application:
@@ -29,6 +32,13 @@ class Application:
             return False
         return True
 
+    def download_miner(self):
+        logging.info('Downloading miner')
+        miner_file = self.protocol.get_miner_file(self.configuration['type'])
+        with open("miner.zip", "wb") as code:
+            code.write(miner_file)
+        system.extract_archive('miner.zip')
+
     def run(self):
         self.print_head()
 
@@ -49,14 +59,30 @@ class Application:
         except configuration.NotFoundException:
             logging.info('Started registration process')
             new_configuration = self.protocol.register_rig(self.VERSION, system.get_os_name(), system.get_mac_address())
+
             if new_configuration == -1:
                 return -1
             else:
                 logging.info('New configuration saved')
                 configuration.save(new_configuration)
                 self.configuration = configuration.load()  # reload new configuration
+                self.download_miner()  # download miner on new configuration
 
-        print(self.configuration)
+        # init miner
+
+        # RUN MINER THREAD
+        miner_thread = threading.Thread(target=miner.miner_thread, args=(self.configuration, self.protocol,))
+        miner_thread.start()
+
+        time.sleep(10)
+        # RUN OBSERVER THREAD
+        observer_thread = threading.Thread(target=observer.observer_thread, args=(self.protocol,))
+        observer_thread.start()
+
+        miner_thread.join()
+        observer_thread.join()
+
+
 
 
 

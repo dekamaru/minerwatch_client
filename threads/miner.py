@@ -1,6 +1,5 @@
-def miner_thread(proto):
-    log('MINER', 'Thread started')
-    configuration = proto.getConfiguration()
+def miner_thread(configuration, proto):
+
     if int(configuration['type']) == MinerType.EWBF:
         cmd = EWBF.getCmd(configuration)
 
