@@ -1,9 +1,11 @@
+from miners.miner_factory import MinerFactory
+import logging
+
 def miner_thread(configuration, proto):
 
-    if int(configuration['type']) == MinerType.EWBF:
-        cmd = EWBF.getCmd(configuration)
+    miner = MinerFactory.create(int(configuration['type']))
 
-    log('MINER', 'Starting miner: ' + cmd)
+    logging.info('Starting miner: ' + miner.get_command(configuration))
     while True:
         p = subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
         p.wait()

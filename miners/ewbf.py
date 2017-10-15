@@ -1,23 +1,34 @@
-class EWBF:
+from miners.base_miner import BaseMiner
+import requests, time
 
-    @staticmethod
-    def getMinerData():
-        minerData = requests.get('http://127.0.0.1:25000/getstat').json()
-        passed_secs = int(time.time()) - int(minerData['start_time'])
-        sendedData = []
+
+class EWBF(BaseMiner):
+
+    def get_data(self):
+        miner_data = requests.get('http://127.0.0.1:25000/getstat').json()
+        passed_secs = int(time.time()) - int(miner_data['start_time'])
+        send_data = []
         # prevent send zero values on miner start
         if passed_secs > 60:
-            for gpu in minerData['result']:
-                sendedData.append({
+            for gpu in miner_data['result']:
+                send_data.append({
                     'name': gpu['name'],
                     'temp': gpu['temperature'],
                     'speed': gpu['speed_sps']
                 })
-        return sendedData
+        return send_data
 
-    @staticmethod
-    def getCmd(configuration):
-        cmd = 'miner.exe --server ' + configuration['host'] + ' --port ' + configuration['port'] + ' --user ' + configuration['username'] + ' --api 0.0.0.0:25000'
+    def get_command(self, configuration):
+        password = ''
+
         if configuration['password'] != '':
-            cmd += ' --pass ' + configuration['password']
+            password = '--pass ' + configuration['password']
+
+        cmd = 'miner.exe --server %s --port %s --user %s --api 0.0.0.0:25000 %s' % (
+            configuration['host'],
+            configuration['port'],
+            configuration['username'],
+            password
+        )
+
         return cmd
