@@ -85,9 +85,9 @@ class Application:
         observer_thread = threading.Thread(target=observer.observer_thread, args=(self.protocol,))
         observer_thread.start()
 
-        miner_thread.join()
         observer_thread.join()
-
+        logging.error('Observer thread are dead because error was occurred')
+        return -1
 
 
 

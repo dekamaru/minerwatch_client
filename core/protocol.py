@@ -1,6 +1,7 @@
 import core.network as network
 import logging
 import time
+import json
 
 
 class BadRequest(Exception):
@@ -59,6 +60,25 @@ class Protocol:
     def get_miner_file(self, miner_type):
         data = self._api_call('miner/' + miner_type, 'get', {}, True).content
         return data
+
+    """
+        Make ping to tracking server
+        :arg miner BaseMiner class
+        :return -1 if rig need register, False on bad ping, True on good ping
+    """
+    def ping(self, miner):
+        miner_data = json.dumps(miner.get_data())
+        payload = {'miner': miner_data}
+        response = self._api_call('ping', 'post', payload)
+        if response['code'] == APICode.SECRET_KEY_NOT_EXISTS:
+            logging.error('Wrong security key!')
+            return False
+        else:
+            if response['code'] == APICode.RIG_NEED_REGISTER:
+                return -1
+            if response['code'] == APICode.OK:
+                return True
+
 
 
 

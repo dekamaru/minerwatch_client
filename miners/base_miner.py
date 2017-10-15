@@ -14,5 +14,6 @@ class BaseMiner:
 
     """
     Should return run command line for implemented miner
+    :arg configuration Account configuration
     """
-    def get_command(self): pass
+    def get_command(self, configuration): pass
