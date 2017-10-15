@@ -19,3 +19,7 @@ def extract_archive(name):
 
     # delete archive
     os.remove(name)
+
+
+def file_exists(path):
+    return os.path.isfile(path)

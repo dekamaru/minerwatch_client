@@ -1,5 +1,6 @@
 from miners.base_miner import BaseMiner
-import requests, time
+import requests
+import time
 
 
 class EWBF(BaseMiner):
@@ -23,8 +24,8 @@ class EWBF(BaseMiner):
 
         if configuration['password'] != '':
             password = '--pass ' + configuration['password']
-
-        cmd = 'miner.exe --server %s --port %s --user %s --api 0.0.0.0:25000 %s' % (
+        # todo: platform-wide
+        cmd = 'miner.exe --server %s --port %s --user %s --api 0.0.0.0:25000 --pec %s' % (
             configuration['host'],
             configuration['port'],
             configuration['username'],

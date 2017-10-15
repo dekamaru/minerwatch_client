@@ -41,6 +41,7 @@ class Protocol:
         Return -1 on fail
     """
     def register_rig(self, observer_version, os, mac):
+        logging.info('Started registration process')
         payload = {'o_ver': observer_version, 'os': os, 'mac': mac}
         data = self._api_call('register', 'get', payload)
         if data['code'] != APICode.OK:

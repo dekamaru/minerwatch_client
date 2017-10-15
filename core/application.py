@@ -39,6 +39,25 @@ class Application:
             code.write(miner_file)
         system.extract_archive('miner.zip')
 
+    def run_integrity_check(self):
+        # first: check the configuration
+        try:
+            self.configuration = configuration.load()
+        except configuration.NotFoundException:
+            new_configuration = self.protocol.register_rig(self.VERSION, system.get_os_name(), system.get_mac_address())
+            if new_configuration == -1:
+                return False
+            else:
+                logging.info('New configuration saved')
+                configuration.save(new_configuration)
+                self.configuration = configuration.load()  # reload new configuration
+
+        # second: check miner file
+        # todo: make this platform-wide
+        if not system.file_exists('miner.exe'):
+            self.download_miner()  # download miner
+        return True
+
     def run(self):
         self.print_head()
 
@@ -53,22 +72,9 @@ class Application:
 
         self.protocol = protocol.Protocol(self.SERVER_HOST, self.argv[1])  # init protocol
 
-        # save configuration or load
-        try:
-            self.configuration = configuration.load()
-        except configuration.NotFoundException:
-            logging.info('Started registration process')
-            new_configuration = self.protocol.register_rig(self.VERSION, system.get_os_name(), system.get_mac_address())
-
-            if new_configuration == -1:
-                return -1
-            else:
-                logging.info('New configuration saved')
-                configuration.save(new_configuration)
-                self.configuration = configuration.load()  # reload new configuration
-                self.download_miner()  # download miner on new configuration
-
-        # init miner
+        integrity_status = self.run_integrity_check()
+        if not integrity_status:
+            return -1
 
         # RUN MINER THREAD
         miner_thread = threading.Thread(target=miner.miner_thread, args=(self.configuration, self.protocol,))
