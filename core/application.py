@@ -14,6 +14,7 @@ class Application:
         self.argv = argv
         self.protocol = None
         self.configuration = None
+        self.miner_thread_process = None
         logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] %(message)s',
                             datefmt='%d.%m.%Y %I:%M:%S')
 
@@ -77,12 +78,12 @@ class Application:
             return -1
 
         # RUN MINER THREAD
-        miner_thread = threading.Thread(target=miner.miner_thread, args=(self.configuration, self.protocol,))
+        miner_thread = threading.Thread(target=miner.miner_thread, args=(self,))
         miner_thread.start()
 
         time.sleep(10)
         # RUN OBSERVER THREAD
-        observer_thread = threading.Thread(target=observer.observer_thread, args=(self.protocol,))
+        observer_thread = threading.Thread(target=observer.observer_thread, args=(self,))
         observer_thread.start()
 
         observer_thread.join()
