@@ -20,8 +20,3 @@ def load():
 def save(configuration):
     with open('miner.settings', 'w') as f:
         f.write(json.dumps(configuration))
-
-
-def delete():
-    os.remove('miner.settings')
-    os.remove('miner.exe')

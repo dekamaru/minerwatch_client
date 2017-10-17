@@ -8,9 +8,8 @@ def observer_thread(app):
     while True:
         status = app.protocol.ping(miner)
         if status == -1:
-            # todo: need re-register
-            app.miner_thread_process.kill()
-            pass
+            # configuration.delete()
+            return
         elif status is False:
             return
         else:

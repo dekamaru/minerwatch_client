@@ -11,7 +11,6 @@ def miner_thread(app):
         logging.info('Starting miner: ' + cmd)
 
         p = subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
-        app.miner_thread_process = p
         p.wait()
 
         # todo: make api call and add timeout (maybe check return code?)
