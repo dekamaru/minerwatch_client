@@ -1,7 +1,8 @@
-import time
 import logging
-from miners.miner_factory import MinerFactory
+import time
 from threading import Thread
+
+from core.miners.miner_factory import MinerFactory
 
 
 class ObserverThread(Thread):

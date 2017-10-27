@@ -1,7 +1,9 @@
-from miners.miner_factory import MinerFactory
-from threading import Thread
 import logging
 import subprocess
+from threading import Thread
+
+from core.miners.miner_factory import MinerFactory
+from core.message.thread_network import ThreadNetwork
 
 
 class MinerThread(Thread):

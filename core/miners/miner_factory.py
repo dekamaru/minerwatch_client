@@ -1,5 +1,6 @@
-from miners.miner_type import MinerType
 from miners.vendor import ewbf
+
+from core.miners.miner_type import MinerType
 
 
 class NotImplementedMiner(Exception):

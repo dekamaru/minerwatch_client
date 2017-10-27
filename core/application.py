@@ -1,8 +1,9 @@
-from core import configuration, network, protocol, system
-from threads import miner, observer
 import logging
-import threading
-import time
+
+from threads import observer
+
+from core import configuration, network, protocol, system
+from core.threads import miner
 
 
 class Application:

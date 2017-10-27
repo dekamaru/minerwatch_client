@@ -1,6 +1,8 @@
-from miners.base_miner import BaseMiner
-import requests
 import time
+
+import requests
+
+from core.miners.base_miner import BaseMiner
 
 
 class EWBF(BaseMiner):
