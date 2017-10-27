@@ -77,11 +77,12 @@ class Application:
             return -1
 
         # RUN MINER THREAD
-        miner_thread = threading.Thread(target=miner.miner_thread, args=(self,))
+
+        miner_thread = miner.MinerThread(self)
         miner_thread.start()
 
         # RUN OBSERVER THREAD
-        observer_thread = threading.Thread(target=observer.observer_thread, args=(self,))
+        observer_thread = observer.ObserverThread(self)
         observer_thread.start()
 
         observer_thread.join()

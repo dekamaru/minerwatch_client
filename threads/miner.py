@@ -1,17 +1,23 @@
 from miners.miner_factory import MinerFactory
+from threading import Thread
 import logging
 import subprocess
 
 
-def miner_thread(app):
-    miner = MinerFactory.create(int(app.configuration['type']))
+class MinerThread(Thread):
+    def __init__(self, application):
+        Thread.__init__(self)
+        self.app = application
 
-    while True:
-        cmd = miner.get_command(app.configuration)
-        logging.info('Starting miner: ' + cmd)
+    def run(self):
+        miner = MinerFactory.create(int(self.app.configuration['type']))
 
-        p = subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
-        p.wait()
+        while True:
+            cmd = miner.get_command(self.app.configuration)
+            logging.info('Starting miner: ' + cmd)
 
-        # todo: make api call and add timeout (maybe check return code?)
-        logging.warning('Miner was crashed. Restart...')
+            p = subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
+            p.wait()
+
+            # todo: make api call and add timeout (maybe check return code?)
+            logging.warning('Miner was crashed. Restart...')
