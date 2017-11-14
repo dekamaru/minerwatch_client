@@ -3,6 +3,8 @@ import logging
 import time
 import json
 
+from core.miners.miner_type import MinerType
+
 
 class BadRequest(Exception):
     pass
@@ -67,7 +69,10 @@ class Protocol:
         :return -1 if rig need register, False on bad ping, True on good ping
     """
     def ping(self, miner):
-        miner_data = json.dumps(miner.get_data())
+        if miner.get_type() == MinerType.NO_PING:
+            miner_data = []
+        else:
+            miner_data = json.dumps(miner.get_data())
         payload = {'miner': miner_data}
         response = self._api_call('ping', 'post', payload)
         if response['code'] == APICode.SECRET_KEY_NOT_EXISTS:

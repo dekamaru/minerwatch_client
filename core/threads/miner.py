@@ -1,9 +1,9 @@
 import logging
 import subprocess
+import configparser
 from threading import Thread
 
 from core.miners.miner_factory import MinerFactory
-from core.message.thread_network import ThreadNetwork
 
 
 class MinerThread(Thread):
@@ -16,6 +16,14 @@ class MinerThread(Thread):
 
         while True:
             cmd = miner.get_command(self.app.configuration)
+
+            try:
+                additional_params = self.app.system_configuration.get('EWBF', 'additional_params')
+            except configparser.NoOptionError:
+                additional_params = None
+
+            cmd += ' ' + additional_params
+
             logging.info('Starting miner: ' + cmd)
 
             p = subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)

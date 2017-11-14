@@ -17,3 +17,8 @@ class BaseMiner:
     :arg configuration Account configuration
     """
     def get_command(self, configuration): pass
+
+    """
+    Should return his type
+    """
+    def get_type(self): pass

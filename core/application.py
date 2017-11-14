@@ -1,22 +1,35 @@
 import logging
 
-from threads import observer
-
 from core import configuration, network, protocol, system
-from core.threads import miner
+from core.threads import miner, observer
+from core.miners.miner_type import MinerType
+import configparser
 
 
 class Application:
 
-    VERSION = '0.2'
-    SERVER_HOST = 'http://163.172.189.169'
+    VERSION = '1.0'
 
     def __init__(self, argv):
         self.argv = argv
         self.protocol = None
         self.configuration = None
+        self.system_configuration = None
+        self.SERVER_HOST = None
         logging.basicConfig(level=logging.INFO, format='[%(asctime)s] [%(levelname)s] %(message)s',
                             datefmt='%d.%m.%Y %I:%M:%S')
+
+    def load_system_configuration(self):
+        config = configparser.ConfigParser()
+        if not system.file_exists('config.ini'):
+            return False
+        config.read('config.ini')
+        try:
+            self.SERVER_HOST = config.get('API', 'host')
+        except configparser.NoOptionError:
+            return False
+
+        self.system_configuration = config
 
     def print_head(self):
         print(' =================================')
@@ -55,7 +68,7 @@ class Application:
 
         # second: check miner file
         # todo: make this platform-wide
-        if not system.file_exists('miner.exe'):
+        if not system.file_exists('miner.exe') and int(self.configuration['type']) != MinerType.NO_PING:
             self.download_miner()  # download miner
         return True
 
@@ -64,6 +77,11 @@ class Application:
 
         if len(self.argv) != 2:
             logging.error('USAGE: minerwatch.exe SECRET_KEY')
+            return -1
+
+        status = self.load_system_configuration()
+        if status is False:
+            logging.error('Config file "config.ini" not exists or broken')
             return -1
 
         # check internet connection
@@ -77,16 +95,13 @@ class Application:
         if not integrity_status:
             return -1
 
-        # RUN MINER THREAD
-
-        miner_thread = miner.MinerThread(self)
-        miner_thread.start()
-
-        # RUN OBSERVER THREAD
-        observer_thread = observer.ObserverThread(self)
-        observer_thread.start()
-
-        observer_thread.join()
+        if int(self.configuration['type']) != MinerType.NO_PING:
+            miner.MinerThread(self).start()
+        else:
+            logging.info('No ping miner selected. Miner thread don\'t start')
+        obs = observer.ObserverThread(self)
+        obs.start()
+        obs.join()
         logging.error('Observer thread are dead because error was occurred')
         return -1
 

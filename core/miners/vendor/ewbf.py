@@ -1,14 +1,18 @@
 import time
-
 import requests
-
+import logging
 from core.miners.base_miner import BaseMiner
+from core.miners.miner_type import MinerType
 
 
 class EWBF(BaseMiner):
 
     def get_data(self):
-        miner_data = requests.get('http://127.0.0.1:25000/getstat').json()
+        try:
+            miner_data = requests.get('http://127.0.0.1:25000/getstat').json()
+        except Exception:
+            logging.warning('Can\'t get miner data from API')
+            return []
         passed_secs = int(time.time()) - int(miner_data['start_time'])
         send_data = []
         # prevent send zero values on miner start
@@ -27,7 +31,7 @@ class EWBF(BaseMiner):
         if configuration['password'] != '':
             password = '--pass ' + configuration['password']
         # todo: platform-wide
-        cmd = 'miner.exe --server %s --port %s --user %s --api 0.0.0.0:25000 --pec %s' % (
+        cmd = 'miner.exe --server %s --port %s --user %s --api 0.0.0.0:25000 %s' % (
             configuration['host'],
             configuration['port'],
             configuration['username'],
@@ -35,3 +39,6 @@ class EWBF(BaseMiner):
         )
 
         return cmd
+
+    def get_type(self):
+        return MinerType.EWBF
