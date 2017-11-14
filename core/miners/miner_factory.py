@@ -1,4 +1,4 @@
-from core.miners.vendor import ewbf, noping
+from core.miners.vendor import ewbf, noping, claymore
 from core.miners.miner_type import MinerType
 
 
@@ -14,5 +14,7 @@ class MinerFactory:
             return ewbf.EWBF()
         elif m_type == MinerType.NO_PING:
             return noping.NoPing()
+        elif m_type == MinerType.CLAYMORE:
+            return claymore.Claymore()
         else:
             raise NotImplementedMiner

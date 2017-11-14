@@ -4,6 +4,7 @@ import configparser
 from threading import Thread
 
 from core.miners.miner_factory import MinerFactory
+from core.miners.miner_type import MinerType
 
 
 class MinerThread(Thread):
@@ -18,9 +19,12 @@ class MinerThread(Thread):
             cmd = miner.get_command(self.app.configuration)
 
             try:
-                additional_params = self.app.system_configuration.get('EWBF', 'additional_params')
+                if int(self.app.configuration['type']) == MinerType.EWBF:
+                    additional_params = self.app.system_configuration.get('EWBF', 'additional_params')
+                elif int(self.app.configuration['type']) == MinerType.CLAYMORE:
+                    additional_params = self.app.system_configuration.get('CLAYMORE', 'additional_params')
             except configparser.NoOptionError:
-                additional_params = None
+                additional_params = ''
 
             cmd += ' ' + additional_params
 
