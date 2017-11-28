@@ -22,3 +22,8 @@ class BaseMiner:
     Should return his type
     """
     def get_type(self): pass
+
+    """
+    Should return his name
+    """
+    def get_name(self): pass

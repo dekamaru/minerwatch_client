@@ -19,11 +19,8 @@ class MinerThread(Thread):
             cmd = miner.get_command(self.app.configuration)
 
             try:
-                if int(self.app.configuration['type']) == MinerType.EWBF:
-                    additional_params = self.app.system_configuration.get('EWBF', 'additional_params')
-                elif int(self.app.configuration['type']) == MinerType.CLAYMORE:
-                    additional_params = self.app.system_configuration.get('CLAYMORE', 'additional_params')
-            except configparser.NoOptionError:
+                additional_params = self.app.system_configuration.get(miner.get_name(), 'additional_params')
+            except configparser.Error:
                 additional_params = ''
 
             cmd += ' ' + additional_params

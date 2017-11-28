@@ -47,7 +47,7 @@ class Claymore(BaseMiner):
         if configuration['password'] != '':
             password = '-epsw ' + configuration['password']
         # todo: platform-wide
-        cmd = 'miner.exe -epool %s:%s -ewal %s %s' % (
+        cmd = 'miner.exe -r -1 -epool %s:%s -ewal %s %s' % (
             configuration['host'],
             configuration['port'],
             configuration['username'],
@@ -58,3 +58,6 @@ class Claymore(BaseMiner):
 
     def get_type(self):
         return MinerType.CLAYMORE
+
+    def get_name(self):
+        return 'CLAYMORE'

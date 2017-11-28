@@ -21,4 +21,4 @@ class ObserverThread(Thread):
                 return
             else:
                 logging.info('Ping success')
-                time.sleep(300)
+                time.sleep(10)

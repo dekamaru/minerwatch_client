@@ -1,27 +1,32 @@
-import time
-import requests
+import json
 import logging
+import socket
 from core.miners.base_miner import BaseMiner
 from core.miners.miner_type import MinerType
 
 
-class EWBF(BaseMiner):
+class DSTM(BaseMiner):
 
     def get_data(self):
-        try:
-            miner_data = requests.get('http://127.0.0.1:25000/getstat').json()
-        except Exception:
-            logging.warning('Can\'t get miner data from API')
-            return []
-        passed_secs = int(time.time()) - int(miner_data['start_time'])
+
         send_data = []
-        # prevent send zero values on miner start
-        if passed_secs > 60:
-            for gpu in miner_data['result']:
+        sock = socket.socket()
+        try:
+            sock.connect(('127.0.0.1', 2222))
+            sock.send(('{"id":1, "method":"getstat"}').encode('utf-8'))
+            data = sock.recv(4096)
+            sock.close()
+        except ConnectionError:
+            logging.warning('Can\'t get miner data from API')
+            return send_data
+
+        telemetry = json.loads(data.decode('utf-8'))
+        if int(telemetry['uptime']) > 60:
+            for gpu in telemetry['result']:
                 send_data.append({
-                    'name': gpu['name'],
+                    'name': 'GPU ' + str(gpu['gpu_id']),
                     'temp': gpu['temperature'],
-                    'speed': gpu['speed_sps']
+                    'speed': gpu['sol_ps']
                 })
         return send_data
 
@@ -31,7 +36,7 @@ class EWBF(BaseMiner):
         if configuration['password'] != '':
             password = '--pass ' + configuration['password']
         # todo: platform-wide
-        cmd = 'miner.exe --server %s --port %s --user %s --api 0.0.0.0:25000 %s' % (
+        cmd = 'miner.exe --telemetry=0.0.0.0:2222 --server %s --port %s --user %s %s' % (
             configuration['host'],
             configuration['port'],
             configuration['username'],
@@ -41,7 +46,7 @@ class EWBF(BaseMiner):
         return cmd
 
     def get_type(self):
-        return MinerType.EWBF
+        return MinerType.DSTM
 
     def get_name(self):
-        return 'EWBF'
+        return 'DSTM'

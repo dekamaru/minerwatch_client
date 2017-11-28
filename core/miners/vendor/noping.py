@@ -12,3 +12,6 @@ class NoPing(BaseMiner):
 
     def get_type(self):
         return MinerType.NO_PING
+
+    def get_name(self):
+        return 'NOPING'
