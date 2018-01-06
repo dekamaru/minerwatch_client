@@ -1,5 +1,6 @@
+import os
 import sys
 
 from core.application import Application
 
-sys.exit(Application(sys.argv).run())
+os._exit(Application(sys.argv).run())

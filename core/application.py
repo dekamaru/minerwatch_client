@@ -8,9 +8,12 @@ import configparser
 
 class Application:
 
-    VERSION = '1.0'
+    VERSION = '1.1'
 
     def __init__(self, argv):
+
+        self.need_stop = False
+
         self.argv = argv
         self.protocol = None
         self.configuration = None
@@ -96,13 +99,24 @@ class Application:
             return -1
 
         if int(self.configuration['type']) != MinerType.NO_PING:
-            miner.MinerThread(self).start()
+            miner_thread = miner.MinerThread(self)
+            observer_thread = observer.ObserverThread(self)
+            miner_thread.start()
+            observer_thread.start()
         else:
             logging.info('No ping miner selected. Miner thread don\'t start')
-        obs = observer.ObserverThread(self)
-        obs.start()
-        obs.join()
-        logging.error('Observer thread are dead because error was occurred')
+            observer_thread = observer.ObserverThread(self)
+            observer_thread.start()
+
+        while not self.need_stop:
+            if not observer_thread.is_alive():
+                logging.error('Observer thread is dead')
+                self.need_stop = True
+
+            if int(self.configuration['type']) != MinerType.NO_PING and not miner_thread.is_alive():
+                logging.error('Miner thread is dead')
+                self.need_stop = True
+
         return -1
 
 

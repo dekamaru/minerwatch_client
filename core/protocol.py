@@ -64,15 +64,18 @@ class Protocol:
         return data
 
     """
+        Sending message to owner
+    """
+    def notify(self, notify_type):
+        payload = {'type': notify_type}
+        self._api_call('notify', 'post', payload)
+
+    """
         Make ping to tracking server
         :arg miner BaseMiner class
         :return -1 if rig need register, False on bad ping, True on good ping
     """
-    def ping(self, miner):
-        if miner.get_type() == MinerType.NO_PING:
-            miner_data = []
-        else:
-            miner_data = json.dumps(miner.get_data())
+    def ping(self, miner_data):
         payload = {'miner': miner_data}
         response = self._api_call('ping', 'post', payload)
         if response['code'] == APICode.SECRET_KEY_NOT_EXISTS:

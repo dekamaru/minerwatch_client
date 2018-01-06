@@ -1,16 +1,23 @@
 import logging
 import subprocess
 import configparser
+import time
 from threading import Thread
+from core.notify_type import NotifyType
 
 from core.miners.miner_factory import MinerFactory
-from core.miners.miner_type import MinerType
 
 
 class MinerThread(Thread):
+
+    CRASH_LIMIT = 3
+    CRASH_TIMEOUT = 60
+
     def __init__(self, application):
         Thread.__init__(self)
         self.app = application
+        self.lifetime = time.time()
+        self.crash_count = 0
 
     def run(self):
         miner = MinerFactory.create(int(self.app.configuration['type']))
@@ -30,5 +37,19 @@ class MinerThread(Thread):
             p = subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE)
             p.wait()
 
-            # todo: make api call and add timeout (maybe check return code?)
-            logging.warning('Miner was crashed. Restart...')
+            # check crash count
+            elapsed = time.time() - self.lifetime
+            if elapsed < MinerThread.CRASH_TIMEOUT:
+                self.crash_count += 1
+            else:
+                self.lifetime = time.time()
+                self.crash_count = 1
+
+            if self.crash_count == MinerThread.CRASH_LIMIT:
+                logging.error('Miner crash limit reached')
+                self.app.protocol.notify(NotifyType.MINER_CRASH_LIMIT)
+                return False
+            else:
+                logging.warning('Miner was crashed. Restart...')
+
+
