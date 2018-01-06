@@ -76,7 +76,7 @@ class Protocol:
         :return -1 if rig need register, False on bad ping, True on good ping
     """
     def ping(self, miner_data):
-        payload = {'miner': miner_data}
+        payload = {'miner': json.dumps(miner_data)}
         response = self._api_call('ping', 'post', payload)
         if response['code'] == APICode.SECRET_KEY_NOT_EXISTS:
             logging.error('Wrong security key!')
