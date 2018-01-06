@@ -25,7 +25,19 @@ class Application:
     def load_system_configuration(self):
         config = configparser.ConfigParser()
         if not system.file_exists('config.ini'):
-            return False
+            with open('config.ini', 'w+') as f:
+                f.write('''[API]
+host = https://miner.dekamaru.com
+
+#[EWBF]
+#additional_params = --pec
+
+#[CLAYMORE]
+#additional_params = -mode 1 -ftime 10
+
+#[DSTM]
+#additional_params =
+                    ''')
         config.read('config.ini')
         try:
             self.SERVER_HOST = config.get('API', 'host')
@@ -56,6 +68,35 @@ class Application:
             code.write(miner_file)
         system.extract_archive('miner.zip')
 
+    def get_secret_key(self):
+        # login and pass
+        rigs = {}
+        secret_key = None
+        logged = False
+        while not logged:
+            username = str(input('Username: '))
+            password = str(input('Password: '))
+
+            response = network.make_request(self.SERVER_HOST + '/auth/remote/rig_list', payload={'username': username, 'password': password}).json()
+            if response['status'] is False:
+                print('Invalid username or password. Try again')
+            else:
+                rigs = response['data']
+                logged = True
+
+        while True:
+            print('Choose your rig:')
+            for rig_num, rig_name in enumerate(rigs):
+                print(str(rig_num) + '. ' + rig_name)
+
+            id = int(input('Rig number: '))
+            if id < 0 or id > len(rigs) - 1:
+                print('Wrong rig number')
+            else:
+                secret_key = list(rigs.items())[id][1]
+                return secret_key
+
+
     def run_integrity_check(self):
         # first: check the configuration
         try:
@@ -78,21 +119,25 @@ class Application:
     def run(self):
         self.print_head()
 
-        if len(self.argv) != 2:
-            logging.error('USAGE: minerwatch.exe SECRET_KEY')
-            return -1
-
         status = self.load_system_configuration()
         if status is False:
             logging.error('Config file "config.ini" not exists or broken')
             return -1
+
+        if not system.file_exists('secret.key'):
+            secret_key = self.get_secret_key()
+            with open('secret.key', 'w+') as f:
+                f.write(secret_key)
+        else:
+            with open('secret.key') as f:
+                secret_key = f.readline()
 
         # check internet connection
         if not self.check_connection():
             logging.error('No connection to Miner Watch server')
             return -1
 
-        self.protocol = protocol.Protocol(self.SERVER_HOST, self.argv[1])  # init protocol
+        self.protocol = protocol.Protocol(self.SERVER_HOST, secret_key)  # init protocol
 
         integrity_status = self.run_integrity_check()
         if not integrity_status:
