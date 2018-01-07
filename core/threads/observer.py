@@ -33,5 +33,4 @@ class ObserverThread(Thread):
             else:
                 self.collections_data.append(miner.get_data())
                 logging.info('Collected miner data ' + str(len(self.collections_data)) + '/' + str(int(ObserverThread.COLLECTIONS_COUNT)))
-                if len(self.collections_data) != ObserverThread.COLLECTIONS_COUNT:
-                    time.sleep(ObserverThread.COLLECT_TIME)
+            time.sleep(ObserverThread.COLLECT_TIME)
