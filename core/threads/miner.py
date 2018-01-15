@@ -2,6 +2,7 @@ import logging
 import subprocess
 import configparser
 import time
+import os
 from threading import Thread
 from core.notify_type import NotifyType
 
@@ -47,7 +48,8 @@ class MinerThread(Thread):
 
             if self.crash_count == MinerThread.CRASH_LIMIT:
                 logging.error('Miner crash limit reached')
-                self.app.protocol.notify(NotifyType.MINER_CRASH_LIMIT)
+                self.app.protocol.notify(NotifyType.MINER_CRASH_REBOOT)
+                os.system("shutdown -t 0 -r -f") # make reboot
                 return False
             else:
                 logging.warning('Miner was crashed. Restart...')

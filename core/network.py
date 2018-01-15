@@ -1,4 +1,6 @@
 import requests
+import logging
+import time
 
 
 class NoInternetConnection(Exception):
@@ -15,4 +17,14 @@ def make_request(url, method='GET', payload=None):
             req = requests.post(url, data=payload)
     except requests.exceptions.RequestException as e:
         raise NoInternetConnection
+    return req
+
+
+def make_waiting_request(url, method='GET', payload=None):
+    try:
+        req = make_request(url, method, payload)
+    except NoInternetConnection:
+        logging.error('Internet connection lost. Sleeping 60 sec')
+        time.sleep(60)
+        return make_waiting_request(url, method, payload)
     return req

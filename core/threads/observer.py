@@ -3,6 +3,7 @@ import time
 from threading import Thread
 
 from core.miners.miner_factory import MinerFactory
+from core.notify_type import NotifyType
 
 
 class ObserverThread(Thread):
@@ -32,5 +33,8 @@ class ObserverThread(Thread):
                 self.collections_data = []
             else:
                 self.collections_data.append(miner.get_data())
+                if self.app.start_notified is False and len(self.collections_data) == 2:
+                    self.app.protocol.notify(NotifyType.MINER_STARTED_SUCCESSFULLY)
+                    self.app.start_notified = True
                 logging.info('Collected miner data ' + str(len(self.collections_data)) + '/' + str(int(ObserverThread.COLLECTIONS_COUNT)))
             time.sleep(ObserverThread.COLLECT_TIME)
